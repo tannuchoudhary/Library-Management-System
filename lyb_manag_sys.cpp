@@ -2,7 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <string.h>
-#define max_len 30
+#define max_len max_len
 
 using namespace std;
 
@@ -12,6 +12,8 @@ private:
 	int dd;
 	int mm;
 	int yy;
+	
+	//rectify date after adding 15 days to the issued date
 	void rectifyDate()
 	{
             //check for leap year
@@ -57,6 +59,8 @@ private:
 		}
 	}
 public:
+
+    //structure of date
 	Date()
 	{
 		dd = 1;
@@ -64,7 +68,7 @@ public:
 		yy = 2021;
 	}
 	
-	
+	//take input date from user
 	void setDate()
 	{
 		cout<<"Enter Date: ";
@@ -74,9 +78,11 @@ public:
 		cout<<"Enter Year: ";
 		cin>>yy;
 	}
+	
+	
 	void setDate(Date temp)
 	{
-	    //15 days allowed for all students to keep them book
+	    //15 days allowed for all students to keep the issued book with them
 		dd = temp.dd + 15;
 		mm = temp.mm;
 		yy = temp.yy;
@@ -88,6 +94,7 @@ public:
 	}
 };
 
+//Menu will contain list of all menu
 class Menu
 {
 public:
@@ -100,35 +107,57 @@ public:
 
 void Menu :: mainMenu()
 {
-	cout<<"##################### Main Menu###############################"<<endl<<endl;
+	cout<<"************************************** Main Menu ************************************** "<<endl<<endl;
 	cout<<"1. Student Menu\n2. Book Menu\n3. Issue Book\n4. Return Book\n";
 	cout<<"5. Exit"<<endl;
 }
 
 void Menu :: studentMenu()
 {
-	cout<<"######################### Student Menu ########################"<<endl<<endl;
+	cout<<"************************************** Student Menu **************************************  "<<endl<<endl;
 	cout<<"1. New Entry\n2. Modify Entry\n3. Search Entry\n4. Delete Entry"<<endl;
 	cout<<"5. View Student Details\n6. Go back to previous menu"<<endl;
 }
 
 void Menu :: bookMenu()
 {
-	cout<<"######################## Book Menu ############################"<<endl<<endl;
+	cout<<"**************************************   Book Menu ************************************** "<<endl<<endl;
 	cout<<"1. New Entry\n2. Modify Entry\n3. Search Entry\n4. Delete Entry"<<endl;
 	cout<<"5. View all books detail\n6. Go back to previous menu"<<endl;
 }
+
+//structure of student data
+class StudentData
+{
+
+public:
+	int rollNo;
+	char name[max_len];
+	char address[50];
+	char branch[5];
+	int status;
+	char bookTitle[max_len];
+	StudentData()
+	{
+		status = 0;
+	}
+};
+
+//structure of BookData
 class BookData
 {
 public:
-    char title[30];
-    char author[30];
-    char publisher[30];
+    char title[max_len];
+    char author[max_len];
+    char publisher[max_len];
     int status;
     float price;
 	int issuedRollNo;
 	Date issueDate;
 	Date returnDate;
+    //constructor for book data
+    //initially, a book is issued by no one, therefore book status = 0
+    //and roll no is any garbage value
 	BookData()
 	{
 		status = 0;
@@ -136,246 +165,6 @@ public:
 	}
 };
 
-class StudentData
-{
-
-public:
-	int rollNo;
-	char name[30];
-	char address[50];
-	char branch[5];
-	int status;
-	char bookTitle[30];
-	StudentData()
-	{
-		status = 0;
-	}
-};
-
-class Book
-{
-public:
-	void inputDetails();
-	void modifyDetails();
-	void searchDetails();
-	void deleteDetails();
-	void viewAllBookDetail();
-};
-
-void Book :: inputDetails()
-{
-    //fstream is a combination of ofstream(Creates and writes to files) and ifstream(Reads from files)
-	fstream ofp;
-	
-	//ios::out allows output (write operations) to a stream. 
-    //Binary files typically contain bytes that are intended to be interpreted as something other than text character
-    //The std::ios::binary flag in the constructor call specifies binary access mode. 
-    //ios::app  jump to the end of file each time your program adds a log entry.
-	ofp.open("bookDatabase.dat", ios :: out | ios :: binary | ios :: app);
-	
-	if(!ofp)
-	{
-		cerr<<"Unable to open file"<<endl;
-		return;
-	}
-
-	BookData book;
-    cout<<"Enter book title: ";
-    cin>>book.title;
-    
-    cout<<"Enter author's name: ";
-    cin.getline(book.author, max_len);
-    
-    cout<<"Enter book publisher: ";
-    cin.getline(book.publisher, max_len);
-    
-    
-    cout<<"Enter book price: ";
-    cin>>book.price;
-    
-    ofp.write((char*) &book, sizeof(BookData));
-    ofp.close();
-}
-
-void Book :: modifyDetails()
-{
-    //fstream is a combination of ofstream(Creates and writes to files) and ifstream(Reads from files)
-	fstream file;
-	//ios::ate will override anything that was added to the file by the other program since your program opened it
-	file.open("bookDatabase.dat", ios :: binary | ios :: in | ios :: out | ios :: ate);
-	
-	if (!file)
-	{
-		cout<<"Unable to open file"<<endl;
-		return;
-	}
-	
-	//seekg is used to sets the position of the next character to be extracted from the input stream from a given file.
-    //beg is used to reach the beginnng of the file
-	file.seekg(0, ios :: beg);
-
-	BookData book;
-	char title[25];
-
-	cout<<"Enter book title of the book you want to modify: ";
-	cin>>title;
-	
-	while (file.read((char*)&book, sizeof(BookData)))
-	{
-		if(strcmp(book.title, title) == 0)
-		{
-			
-			int position = (-1)*sizeof(BookData);
-            file.seekp(position, ios :: cur);
-            
-            cout<<"Enter new book title: ";
-            cin>>book.title;
-            
-            cout<<"Enter new author's name: ";
-            cin.getline(book.author, max_len);
-    
-            cout<<"Enter new book publisher: ";
-            cin.getline(book.publisher, max_len);
-            
-			cout<<"Enter new book price: ";
-			cin>>book.price;
-			
-			cout<<"Record updated";
-			cin.get();
-			cin.get();
-			return;
-		}
-	}
-	cout<<"Book not found!";
-	cin.get();
-	cin.get();
-	return;
-}
-
-void Book :: searchDetails()
-{
-	fstream file;
-	file.open("bookDatabase.dat", ios :: in | ios :: binary);
-	
-	if (!file)
-	{
-		cout<<"Unable to open file!"<<endl;
-		cin.get();
-		cin.get();
-		return;
-	}
-
-	BookData book;
-	char title[30];
-
-	cout<<"Enter book title of the book you want to modify: ";
-	cin>>title;
-
-	while (file.read((char*)&book, sizeof(BookData)))
-	{
-		if (strcmp(book.title, title) == 0)
-		{
-			cout<<"Book title: "<<book.title<<endl;
-			cout<<"Book author: "<<book.author<<endl;
-			cout<<"Book publisher: "<<book.publisher<<endl;
-			cout<<"Book price: "<<book.price<<endl;
-			if (book.status == 1)
-			{
-				cout<<"Issued status: "<<book.issuedRollNo<<endl;
-				cout<<"Issued date: ";
-				book.issueDate.showDate();
-				cout<<endl<<"Return Date: ";
-				book.returnDate.showDate();
-				cout<<endl;
-			}
-			else
-			{
-				cout<<"Issued status: None"<<endl;
-			}
-			cin.get();
-			cin.get();
-			return;
-		}
-	}
-	cout<<"Book not found"<<endl;
-	cin.get();
-	cin.get();
-	return;
-}
-
-void Book :: deleteDetails()
-{
-	fstream file,temp;
-	file.open("bookDatabase.dat", ios :: binary | ios :: in);
-	temp.open("temp.dat", ios :: binary | ios :: out);
-
-	char title[25];
-	BookData book;
-	int flag = 0;
-
-	cout<<"Enter book title to remove: ";
-	cin>>title;
-
-	while (file.read((char*)&book, sizeof(BookData)))
-	{
-		if (strcmp(book.title, title) == 0)
-		{
-			flag++;
-			continue;
-		}
-		
-		temp.write((char*)&book, sizeof(BookData));
-	}
-
-	file.close();
-	temp.close();
-	remove("bookDatabase.dat");
-	rename("temp.dat", "bookDatabase.dat");
-
-	if (flag == 1)
-		cout<<"Record Deleted"<<endl;
-	else
-		cout<<"Record not found"<<endl;
-	cin.get();
-	cin.get();
-	return;
-}
-
-void Book :: viewAllBookDetail()
-{
-	fstream file;
-	file.open("bookDatabase.dat", ios :: binary | ios :: in);
-	
-	BookData book;
-	int choice = 1;
-
-	while(file.read((char*)&book, sizeof(BookData)) && choice)
-	{
-		system("clear");
-		cout<<"Book title: "<<book.title<<endl;
-		cout<<"Book author: "<<book.author<<endl;
-		cout<<"Book publisher: "<<book.publisher<<endl;
-		cout<<"Book price: "<<book.price<<endl;
-		if (book.status == 1)
-		{
-			cout<<"Issued status: "<<book.issuedRollNo<<endl;
-			cout<<"Issued date: ";
-			book.issueDate.showDate();
-			cout<<endl<<"Return Date: ";
-			book.returnDate.showDate();
-		}
-		else
-		{
-			cout<<"Issued status: None"<<endl;
-		}
-		
-		cout<<"Press 1 to view the next book else press 0: ";
-		cin>>choice;
-	}
-	cin.get();
-	cin.get();
-	return;
-}
 
 class Student
 {
@@ -389,9 +178,16 @@ public:
 
 void Student ::  inputDetails()
 {
+    //fstream is a combination of ofstream(Creates and writes to files) and ifstream(Reads from files)
 	fstream ofp; //Output File Pointer
+
+    //ios::out allows output (write operations) to a stream.
+    //Binary files typically contain bytes that are intended to be interpreted as something other than text character
+    //The std::ios::binary flag in the constructor call specifies binary access mode. 
+    //ios::app  jump to the end of file each time your program adds a log entry.
 	ofp.open("studentDatabase.dat", ios :: out | ios:: app | ios :: binary);
 
+    //if file will not open then just display error message and return from there
 	if(!ofp)
 	{
 		cerr<<"Unable to open file"<<endl;
@@ -399,14 +195,21 @@ void Student ::  inputDetails()
 	}
 
 	StudentData student;
+
 	cout<<"Enter student's roll no. :";
 	cin>>student.rollNo;
+
 	cout<<"Enter student's name :";
+	cin.ignore();
 	cin.getline(student.name, max_len);
+
 	cout<<"Enter student's address :";
+	cin.ignore();
 	cin.getline(student.address, max_len);
+
 	cout<<"Enter student's branch :";
-	cin>>student.branch;
+    cin.ignore();
+	cin.getline(student.branch, max_len);
 	
 	cout<<"Record added to database!";
 
@@ -433,6 +236,7 @@ void Student :: modifyDetails()
 
 	StudentData student;
 
+   //read from the file character by character
 	while (fp.read((char*)&student, sizeof(student)))
 	{
 		if (target == student.rollNo)
@@ -443,8 +247,10 @@ void Student :: modifyDetails()
 			cout<<"Enter student's new roll no. :";
 			cin>>student.rollNo;
 			cout<<"Enter student's new name :";
+			cin.ignore();
 			cin.getline(student.name, max_len);
 			cout<<"Enter student's new address :";
+			cin.ignore();
 			cin.getline(student.address, max_len);
 			cout<<"Enter student's new branch :";
 			cin>>student.branch;
@@ -585,6 +391,239 @@ void Student :: deleteDetails()
 	return;
 }
 
+
+class Book
+{
+public:
+	void inputDetails();
+	void modifyDetails();
+	void searchDetails();
+	void deleteDetails();
+	void viewAllBookDetail();
+};
+
+void Book :: inputDetails()
+{
+    //fstream is a combination of ofstream(Creates and writes to files) and ifstream(Reads from files)
+	fstream ofp;
+	
+	//ios::out allows output (write operations) to a stream.
+    //Binary files typically contain bytes that are intended to be interpreted as something other than text character
+    //The std::ios::binary flag in the constructor call specifies binary access mode. 
+    //ios::app  jump to the end of file each time your program adds a log entry.
+	ofp.open("bookDatabase.dat", ios :: out | ios :: binary | ios :: app);
+	
+	if(!ofp)
+	{
+		cerr<<"Unable to open file"<<endl;
+		return;
+	}
+
+	BookData book;
+    cout<<"Enter book title: ";
+    cin>>book.title;
+    
+    
+    cout<<"Enter author's name: ";
+    cin.ignore();
+    cin.getline(book.author, max_len);
+    
+    
+    cout<<"Enter book publisher: ";
+    cin.ignore();
+    cin.getline(book.publisher, max_len);
+    
+    
+    cout<<"Enter book price: ";
+    cin>>book.price;
+    
+    ofp.write((char*) &book, sizeof(BookData));
+    ofp.close();
+}
+
+void Book :: modifyDetails()
+{
+    //fstream is a combination of ofstream(Creates and writes to files) and ifstream(Reads from files)
+	fstream file;
+	//ios::ate will override anything that was added to the file by the other program since your program opened it
+	file.open("bookDatabase.dat", ios :: binary | ios :: in | ios :: out | ios :: ate);
+	
+	if (!file)
+	{
+		cout<<"Unable to open file"<<endl;
+		return;
+	}
+	
+	//seekg is used to sets the position of the next character to be extracted from the input stream from a given file.
+    //beg is used to reach the beginnng of the file
+	file.seekg(0, ios :: beg);
+
+	BookData book;
+	char title[25];
+
+	cout<<"Enter book title of the book you want to modify: ";
+	cin>>title;
+	
+	while (file.read((char*)&book, sizeof(BookData)))
+	{
+		if(strcmp(book.title, title) == 0)
+		{
+			
+			int position = (-1)*sizeof(BookData);
+            file.seekp(position, ios :: cur);
+            
+            cout<<"Enter new book title: ";
+            cin>>book.title;
+            
+            cout<<"Enter new author's name: ";
+            cin.ignore();
+            cin.getline(book.author, max_len);
+    
+            cout<<"Enter new book publisher: ";
+            cin.ignore();
+            cin.getline(book.publisher, max_len);
+            
+			cout<<"Enter new book price: ";
+			cin>>book.price;
+			
+			cout<<"Record updated";
+			cin.get();
+			cin.get();
+			return;
+		}
+	}
+	cout<<"Book not found!";
+	cin.get();
+	cin.get();
+	return;
+}
+
+void Book :: searchDetails()
+{
+	fstream file;
+	file.open("bookDatabase.dat", ios :: in | ios :: binary);
+	
+	if (!file)
+	{
+		cout<<"Unable to open file!"<<endl;
+		cin.get();
+		cin.get();
+		return;
+	}
+
+	BookData book;
+	char title[max_len];
+
+	cout<<"Enter book title of the book you want to modify: ";
+	cin>>title;
+
+	while (file.read((char*)&book, sizeof(BookData)))
+	{
+		if (strcmp(book.title, title) == 0)
+		{
+			cout<<"Book title: "<<book.title<<endl;
+			cout<<"Book author: "<<book.author<<endl;
+			cout<<"Book publisher: "<<book.publisher<<endl;
+			cout<<"Book price: "<<book.price<<endl;
+			if (book.status == 1)
+			{
+				cout<<"Issued status: "<<book.issuedRollNo<<endl;
+				cout<<"Issued date: ";
+				book.issueDate.showDate();
+				cout<<endl<<"Return Date: ";
+				book.returnDate.showDate();
+				cout<<endl;
+			}
+			else
+			{
+				cout<<"Issued status: None"<<endl;
+			}
+			cin.get();
+			cin.get();
+			return;
+		}
+	}
+	cout<<"Book not found"<<endl;
+	cin.get();
+	cin.get();
+	return;
+}
+
+void Book :: deleteDetails()
+{
+	fstream file,temp;
+	file.open("bookDatabase.dat", ios :: binary | ios :: in);
+	temp.open("temp.dat", ios :: binary | ios :: out);
+
+	char title[25];
+	BookData book;
+	int flag = 0;
+
+	cout<<"Enter book title to remove: ";
+	cin>>title;
+
+	while (file.read((char*)&book, sizeof(BookData)))
+	{
+		if (strcmp(book.title, title) == 0)
+		{
+			flag++;
+			continue;
+		}
+		
+		temp.write((char*)&book, sizeof(BookData));
+	}
+
+	file.close();
+	temp.close();
+	remove("bookDatabase.dat");
+	rename("temp.dat", "bookDatabase.dat");
+
+	if (flag == 1)
+		cout<<"Record Deleted"<<endl;
+	else
+		cout<<"Record not found"<<endl;
+	cin.get();
+	cin.get();
+	return;
+}
+
+void Book :: viewAllBookDetail()
+{
+	fstream file;
+	file.open("bookDatabase.dat", ios :: binary | ios :: in);
+	
+	BookData book;
+	int choice = 1;
+
+	while(file.read((char*)&book, sizeof(BookData)) && choice)
+	{
+		system("clear");
+		cout<<"Book title: "<<book.title<<endl;
+		cout<<"Book author: "<<book.author<<endl;
+		cout<<"Book publisher: "<<book.publisher<<endl;
+		cout<<"Book price: "<<book.price<<endl;
+		if (book.status == 1)
+		{
+			cout<<"Issued status: "<<book.issuedRollNo<<endl;
+			cout<<"Issued date: ";
+			book.issueDate.showDate();
+			cout<<endl<<"Return Date: ";
+			book.returnDate.showDate();
+		}
+		else
+		{
+			cout<<"Issued status: None"<<endl;
+		}
+		
+		cout<<"Press 1 to view the next book else press 0: ";
+		cin>>choice;
+	}
+	cin.get();
+	cin.get();
+	return;
+}
+
+
 void Menu :: issueBook()
 {
 	fstream sp, bp;
@@ -594,7 +633,7 @@ void Menu :: issueBook()
 	sp.seekg(0, ios :: beg);
 
 	int rollNo, flagS = 0, flagB = 0, position;
-	char title[30];
+	char title[max_len];
 	StudentData student;
 	BookData book;
 
@@ -692,7 +731,7 @@ void Menu :: returnBook()
 	sp.seekg(0, ios :: beg);
 
 	int rollNo, flagS = 0, flagB = 0, position;
-	char title[30];
+	char title[max_len];
 	StudentData student;
 	BookData book;
 
@@ -779,17 +818,22 @@ int main()
 	int quit = 0;
 	char choice[3];
 	
-
 	while(!quit)
 	{
+        //system("clear") clears the screen for user
 		system("clear");
 		menu.mainMenu();
+
 		cout<<"Please enter your choice: "<<endl;
 		cin>>choice;
+
 		switch(atoi(choice))
 		{
-			/*atoi() converts numbers in string to integers(i.e "23" to 23).
-			  This is to protect user from giving any character input*/
+            //atoi() function converts the number written in the form of string to integers
+            //e.g - "72" will be converted into 72
+            //this is to prevent user from entering any character input
+			
+            //student menu
 			case 1: {
 						system("clear");
 						menu.studentMenu();
@@ -812,13 +856,15 @@ int main()
 
 							case 5: s1.viewAllStudentDetail();
 								break;
+
 							case 6: break;
 
-							default: cout<<"Wrong Input recieved!"<<endl;
+							default: cout<<"Sorry, Invalid Input recieved!"<<endl;
 						}
 						break;
 					}
 
+            //book menu
 			case 2: {
 						system("clear");
 						menu.bookMenu();
@@ -858,6 +904,7 @@ int main()
 			case 5: quit++;
 					break;
 
+            //cerr is used to display error message
 			default: cerr<<"Please Enter correct input!"<<endl;
 					 cin>>choice;
 		}
