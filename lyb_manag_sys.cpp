@@ -2,7 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <string.h>
-#define max_len max_len
+#define max_len 30
 
 using namespace std;
 
